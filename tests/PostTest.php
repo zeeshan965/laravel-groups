@@ -1,0 +1,108 @@
+<?php
+
+class PostTest extends GroupsTestCase
+{
+    /**
+     * @var array
+     */
+    public $postData;
+
+    public function setUp() : void
+    {
+        parent::setUp();
+
+        $this->user = $this->createUsers();
+
+        $this->postData = ['user_id' => $this->user->id, 'title' => 'my title', 'body' => 'This is the body', 'type' => 'text'];
+
+        $this->group = $this->createGroup($this->user->id);
+
+        $this->post = Groups::createPost($this->postData);
+    }
+
+    /** @test **/
+    public function it_creates_a_post()
+    {
+        $this->assertDatabaseHas('posts', ['id' => 1, 'title' => 'my title', 'body' => 'This is the body']);
+    }
+
+    /** @test **/
+    public function it_updates_a_post()
+    {
+        $this->postData['title'] = 'new title';
+
+        $this->post->update($this->postData);
+
+        $this->assertDatabaseHas('posts', ['id' => 1, 'title' => 'new title', 'body' => 'This is the body']);
+    }
+
+    /** @test **/
+    public function it_can_delete_a_post()
+    {
+        $this->post->delete();
+
+        $this->assertDatabaseMissing('posts', ['id' => 1, 'title' => 'my title', 'body' => 'This is the body']);
+    }
+
+    /** @test */
+    public function it_can_return_a_post()
+    {
+        $post = Groups::post($this->post->id);
+
+        $this->assertEquals(1, $post->id);
+    }
+
+    /** @test **/
+    public function it_can_attach_a_post_to_a_group()
+    {
+        $this->group->attachPost($this->post->id);
+
+        $this->assertDatabaseHas('group_post', ['post_id' => 1, 'group_id' => 1]);
+    }
+
+    /** @test **/
+    public function it_detach_a_post_from_a_group()
+    {
+        $this->group->attachPost($this->post->id);
+
+        $this->assertDatabaseHas('group_post', ['post_id' => 1, 'group_id' => 1]);
+
+        $this->group->detachPost($this->post->id);
+
+        $this->assertEquals(0, $this->group->fresh()->posts->count());
+    }
+
+    /** @test **/
+    public function it_can_attach_multiple_posts_to_a_group()
+    {
+        $this->post2 = Groups::createPost($this->postData);
+
+        $this->group->attachPost([$this->post->id, $this->post2->id]);
+
+        $this->assertEquals(2, $this->group->fresh()->posts->count());
+    }
+
+    /** @test **/
+    public function it_can_count_user_posts()
+    {
+        $this->post2 = Groups::createPost($this->postData);
+
+        $user = Psycho\Groups\Models\User::find(1);
+
+        $this->assertEquals(2, $user->posts->count());
+    }
+
+    /** @test **/
+    public function a_user_can_report_a_post()
+    {
+        $this->post->report($this->user->id);
+
+        $this->assertDatabaseHas('reports', [
+            'user_id'         => $this->user->id,
+            'reportable_id'   => $this->post->id,
+            'reportable_type' => get_class($this->post),
+        ]);
+
+        $this->assertTrue($this->post->isReported($this->user->id));
+    }
+}
