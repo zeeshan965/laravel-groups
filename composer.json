@@ -1,5 +1,5 @@
 {
-    "name": "zeeshan/groups",
+    "name": "psycho/groups",
     "description": "Laravel 5 user groups package originally by musonza/groups. I fork it and made some upgrades in the code & mold it according to my project needs.",
     "license": "MIT",
     "keywords": [
