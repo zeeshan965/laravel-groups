@@ -1,8 +1,3 @@
-[![Build Status](https://travis-ci.org/psycho/groups.svg?branch=master)](https://travis-ci.org/psycho/groups)
-[![Downloads](https://img.shields.io/packagist/dt/psycho/groups.svg?style=flat-square)](https://packagist.org/packages/psycho/groups)
-[![Packagist](https://img.shields.io/packagist/v/psycho/groups.svg)](https://packagist.org/packages/psycho/groups)
-[![StyleCI](https://styleci.io/repos/55277679/shield?branch=master)](https://styleci.io/repos/55277679)
-
 # Table of content
 
 - [Description](#description)
