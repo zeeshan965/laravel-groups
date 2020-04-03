@@ -233,12 +233,12 @@ class Group extends Model
      * @param $request
      * @return array
      */
-    public static function insert_group ( $request )
+    public static function insert_group ( $request, $user_id )
     {
         try {
             $user_members = $request -> has ( 'user_members' ) ? explode ( ",", $request -> user_members ) : [];
             $users = User ::whereIn ( 'id', $user_members ) -> get ();
-            $group = self ::create ( self ::prepare_data ( $request, true ) );
+            $group = self ::create ( self ::prepare_data ( $request, $user_id, true ) );
             $group -> request ( $users -> toArray (), true );
 
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $group ];
@@ -251,15 +251,16 @@ class Group extends Model
 
     /**
      * @param $request
+     * @param $user_id
      * @param $id
      * @return array
      */
-    public static function update_group ( $request, $id )
+    public static function update_group ( $request, $user_id, $id )
     {
         try {
             $user_members = $request -> has ( 'user_members' ) ? explode ( ",", $request -> user_members ) : [];
             $users = User ::whereIn ( 'id', $user_members ) -> get ();
-            $group = self ::find ( $id ) -> update ( self ::prepare_data ( $request ) );
+            $group = self ::find ( $id ) -> update ( self ::prepare_data ( $request, $user_id ) );
             self ::find ( $id ) -> request ( $users -> toArray (), true );
 
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $group ];
@@ -271,10 +272,11 @@ class Group extends Model
 
     /**
      * @param $request
+     * @param $user_id
      * @param bool $create
      * @return mixed
      */
-    private static function prepare_data ( $request, $create = false )
+    private static function prepare_data ( $request, $user_id, $create = false )
     {
         if ( $request -> has ( 'group_cover' ) === true ) $array[ 'image' ] = self ::save_to_s3 ( $request -> group_cover );
         if ( $request -> has ( 'group_icon' ) === true ) $array[ 'icon' ] = self ::save_to_s3 ( $request -> group_icon );
@@ -284,7 +286,7 @@ class Group extends Model
         $array[ 'name' ] = $request -> group_name;
         $array[ 'description' ] = $request -> description;
         $array[ 'private' ] = $request -> privacy;
-        $array[ 'user_id' ] = Helper ::getLoggedInCompanyId ();
+        $array[ 'user_id' ] = $user_id;
         return $array;
     }
 
