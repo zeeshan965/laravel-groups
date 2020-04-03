@@ -90,8 +90,24 @@ class CreateGroupsTables extends Migration
                 $table -> integer ( 'post_id' ) -> unsigned ();
             }
             $table -> string ( 'unique_id' ) -> nullable ();
+            $table -> text ( 'user_ip' ) -> nullable ();
+            $table -> bigInteger ( 'parent_id' ) -> nullable ();
             $table -> string ( 'body' );
             $table -> string ( 'type' ) -> nullable ();
+            $table -> timestamps ();
+            $table -> softDeletes ();
+        } );
+
+        Schema ::create ( 'comments_attachment', function ( Blueprint $table ) {
+            if ( $this -> useBigIncrements ){
+                $table -> bigIncrements ( 'id' );
+                $table -> integer ( 'comment_id' ) -> unsignedBigIntegers ();
+            }else{
+                $table -> increments ( 'id' );
+                $table -> integer ( 'comment_id' ) -> unsignedBigIntegers ();
+            }
+            $table -> text ( 'attachment_url' );
+            $table -> enum ( 'attachment_type', [ 'image', 'video' ] );
             $table -> timestamps ();
             $table -> softDeletes ();
         } );
