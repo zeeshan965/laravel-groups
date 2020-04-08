@@ -14,6 +14,16 @@ class Comment extends Model
     use Likes, Reporting, SoftDeletes;
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName ()
+    {
+        return 'id';
+    }
+
+    /**
      * @var string
      */
     protected $table = 'groups_comments';

@@ -12,6 +12,16 @@ class Post extends Model
     use Likes, Reporting, SoftDeletes;
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName ()
+    {
+        return 'id';
+    }
+
+    /**
      * @var array
      */
     protected $fillable = [ 'title', 'user_id', 'body', 'type', 'extra_info', 'unique_id' ];
