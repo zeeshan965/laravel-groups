@@ -176,7 +176,7 @@ class CreateGroupsTables extends Migration
         Schema ::drop ( 'group_user' );
         Schema ::drop ( 'posts' );
         Schema ::drop ( 'groups_comments' );
-        Schema ::drop ( 'groups_comments_attachment' );
+        Schema ::drop ( 'comments_attachment' );
         Schema ::drop ( 'group_post' );
         Schema ::drop ( 'likes' );
         Schema ::drop ( 'reports' );
