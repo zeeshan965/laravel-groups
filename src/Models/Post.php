@@ -31,7 +31,7 @@ class Post extends Model
      */
     public function comments ()
     {
-        return $this -> hasMany ( Comment::class, 'post_id' ) -> with ( 'commentator' );
+        return $this -> hasMany ( Comment::class, 'post_id' ) -> with ( 'commentator' ) -> where ( 'parent_id', null );
     }
 
     /**
