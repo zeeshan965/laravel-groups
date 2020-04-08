@@ -15,12 +15,12 @@ class Comment extends Model
     /**
      * @var string
      */
-    protected $table = 'group_comments';
+    protected $table = 'groups_comments';
 
     /**
      * @var array
      */
-    protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type' ];
+    protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type', 'parent_id', 'user_ip' ];
 
     /**
      * @return mixed
@@ -65,25 +65,20 @@ class Comment extends Model
     /**
      * Adds a comment.
      *
-     * @param array $comment
-     *
-     * @return Comment
+     * @param $data
+     * @return array
      */
-    public function add_comment ( $comment )
+    public static function add_comment ( $data )
     {
         try {
-
-            self ::create ( [
-
-            ] );
-
-            return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $group ];
+            $data[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
+            $data[ 'ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
+            $self = self ::create ( $data );
+            return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
             return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
-
-        return $this -> create ( $comment );
     }
 
     /**
