@@ -79,7 +79,7 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
-        Schema ::create ( 'comments', function ( Blueprint $table ) {
+        Schema ::create ( 'groups_comments', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
                 $table -> integer ( 'user_id' ) -> unsignedBigIntegers ();
@@ -175,8 +175,8 @@ class CreateGroupsTables extends Migration
         Schema ::drop ( 'groups' );
         Schema ::drop ( 'group_user' );
         Schema ::drop ( 'posts' );
-        Schema ::drop ( 'comments' );
-        Schema ::drop ( 'comments_attachment' );
+        Schema ::drop ( 'groups_comments' );
+        Schema ::drop ( 'groups_comments_attachment' );
         Schema ::drop ( 'group_post' );
         Schema ::drop ( 'likes' );
         Schema ::drop ( 'reports' );
