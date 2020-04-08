@@ -5,6 +5,7 @@ namespace Psycho\Groups\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Psycho\Groups\Traits\Likes;
 use Psycho\Groups\Traits\Reporting;
 
@@ -73,6 +74,7 @@ class Comment extends Model
         try {
             $data[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
             $data[ 'ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
+            $data[ 'user_id' ] = Auth ::user () -> id;
             $self = self ::create ( $data );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
