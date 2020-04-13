@@ -34,16 +34,37 @@ class Comment extends Model
     protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type', 'parent_id', 'user_ip' ];
 
     /**
-     * Register any events for your application
-     *
-     * @return void
+     * @var array
      */
-    public static function boot ()
+    protected static $ids = [];
+
+    /**
+     * @param $replies
+     */
+    public static function recursiveDelete ( $id )
     {
-        parent ::boot ();
-        static ::deleting ( function ( $comment ) {
-            $comment -> replies () -> delete ();
-        } );
+        try {
+            $self = self ::find ( $id );
+            array_push ( self ::$ids, $self -> id );
+            if ( $self -> replies -> count () > 0 ) $ids = self ::removeChildren ( $self -> replies, self ::$ids );
+            $status = self ::destroy ( self ::$ids ) === count ( self ::$ids ) ? true : false;
+            return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record deleted successfully!', 'data' => $status ];
+        } catch ( Exception $e ) {
+            $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
+            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+        }
+
+    }
+
+    /**
+     * @param $replies
+     */
+    private static function removeChildren ( $replies )
+    {
+        foreach ( $replies as $reply ) {
+            array_push ( self ::$ids, $reply -> id );
+            if ( $reply -> replies -> count () > 0 ) self ::removeChildren ( $reply -> replies );
+        }
     }
 
     /**
@@ -87,14 +108,6 @@ class Comment extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function parentComment ()
-    {
-        return $this -> belongsTo ( Comment::class, 'parent_id', 'id' );
-    }
-
-    /**
      * Adds a comment.
      *
      * @param $data
@@ -105,7 +118,7 @@ class Comment extends Model
         try {
             $data[ 'parent_id' ] = $data[ 'parent_id' ] === 'null' || $data[ 'parent_id' ] === null ? null : $data[ 'parent_id' ];
             $data[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
-            $data[ 'ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
+            $data[ 'user_ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
             $data[ 'user_id' ] = Auth ::user () -> id;
             $self = self ::create ( $data );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];

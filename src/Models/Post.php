@@ -37,6 +37,14 @@ class Post extends Model
     /**
      * @return mixed
      */
+    public function allComments ()
+    {
+        return $this -> hasMany ( Comment::class, 'post_id' ) -> with ( 'commentator' );
+    }
+
+    /**
+     * @return mixed
+     */
     public function likes ()
     {
         return $this -> morphMany ( Like::class, 'likeable' );
@@ -48,6 +56,14 @@ class Post extends Model
     public function reports ()
     {
         return $this -> morphMany ( Report::class, 'reportable' );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function owner ()
+    {
+        return $this -> belongsTo ( User::class, 'user_id' );
     }
 
     /**
