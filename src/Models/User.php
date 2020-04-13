@@ -3,6 +3,7 @@
 namespace Psycho\Groups\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Storage;
 use Psycho\Groups\Traits\GroupHelpers;
 
 class User extends Authenticatable
@@ -12,7 +13,7 @@ class User extends Authenticatable
     /**
      * @var array
      */
-    protected $appends = ['full_name'];
+    protected $appends = [ 'full_name' ];
 
     /**
      * Get the user's first name.
@@ -20,9 +21,9 @@ class User extends Authenticatable
      * @param string $value
      * @return string
      */
-    public function getFirstNameAttribute($value)
+    public function getFirstNameAttribute ( $value )
     {
-        return ucfirst($value);
+        return ucfirst ( $value );
     }
 
     /**
@@ -31,9 +32,9 @@ class User extends Authenticatable
      * @param string $value
      * @return string
      */
-    public function getLastNameAttribute($value)
+    public function getLastNameAttribute ( $value )
     {
-        return ucfirst($value);
+        return ucfirst ( $value );
     }
 
     /**
@@ -41,8 +42,20 @@ class User extends Authenticatable
      *
      * @return string
      */
-    public function getFullNameAttribute()
+    public function getFullNameAttribute ()
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * Get the user's profile pic.
+     *
+     * @return string
+     */
+    public function getProfilePicAttribute ( $value )
+    {
+        if ( $value == null ) return $value;
+        return Storage ::disk ( 's3' ) -> url ( $value );
+
     }
 }

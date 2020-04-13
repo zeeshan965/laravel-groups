@@ -32,6 +32,8 @@ class CreateGroupsTables extends Migration
                 $table -> integer ( 'user_id' ) -> unsigned ();
                 $table -> integer ( 'conversation_id' ) -> unsigned () -> nullable ();
             }
+            $table -> string ( 'category', 255 );
+
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> string ( 'name' );
             $table -> string ( 'description' ) -> nullable ();
@@ -56,6 +58,7 @@ class CreateGroupsTables extends Migration
                 $table -> integer ( 'user_id' ) -> unsigned ();
                 $table -> integer ( 'group_id' ) -> unsigned ();
             }
+            $table -> tinyInteger ( 'is_blocked' ) ->default ( 0 );
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> tinyInteger ( 'is_admin' ) ->default ( '0' ) -> comment ( '1=Admin;0=Not Admin' );
             $table -> timestamps ();
@@ -163,6 +166,20 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema ::create ( 'group_tags', function ( Blueprint $table ) {
+            $table -> increments ( 'id' );
+            $table -> string ( 'name' );
+            if ( $this -> useBigIncrements ){
+                $table -> unsignedBigInteger ( 'group_id' );
+                $table -> integer ( 'created_by' ) -> unsignedBigIntegers ();
+            }else{
+                $table -> integer ( 'group_id' ) -> unsigned ();
+                $table -> integer ( 'created_by' ) -> unsigned ();
+                $table -> integer ( 'group_id' ) -> unsigned ();
+            }
+            $table -> timestamps ();
+        } );
+
     }
 
     /**
@@ -181,5 +198,6 @@ class CreateGroupsTables extends Migration
         Schema ::drop ( 'likes' );
         Schema ::drop ( 'reports' );
         Schema ::drop ( 'group_request' );
+        Schema ::drop ( 'group_tags' );
     }
 }

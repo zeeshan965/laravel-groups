@@ -34,6 +34,19 @@ class Comment extends Model
     protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type', 'parent_id', 'user_ip' ];
 
     /**
+     * Register any events for your application
+     *
+     * @return void
+     */
+    public static function boot ()
+    {
+        parent ::boot ();
+        static ::deleting ( function ( $comment ) {
+            $comment -> replies () -> delete ();
+        } );
+    }
+
+    /**
      * @return mixed
      */
     public function commentator ()
@@ -74,6 +87,14 @@ class Comment extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function parentComment ()
+    {
+        return $this -> belongsTo ( Comment::class, 'parent_id', 'id' );
+    }
+
+    /**
      * Adds a comment.
      *
      * @param $data
@@ -82,6 +103,7 @@ class Comment extends Model
     public static function add_comment ( $data )
     {
         try {
+            $data[ 'parent_id' ] = $data[ 'parent_id' ] === 'null' || $data[ 'parent_id' ] === null ? null : $data[ 'parent_id' ];
             $data[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
             $data[ 'ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
             $data[ 'user_id' ] = Auth ::user () -> id;
