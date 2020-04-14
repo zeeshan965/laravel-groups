@@ -20,17 +20,17 @@ class CreateGroupsTables extends Migration
      */
     public function up ()
     {
-
+        Schema::dropIfExists('groups');
         Schema ::create ( 'groups', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ) {
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsignedBigIntegers ();
-                $table -> integer ( 'conversation_id' ) -> unsignedBigIntegers () -> nullable ();
+                $table -> unsignedBigInteger ( 'user_id' );
+                $table -> unsignedBigInteger ( 'conversation_id' ) -> nullable ();
             }
             else {
                 $table -> increments ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsigned ();
-                $table -> integer ( 'conversation_id' ) -> unsigned () -> nullable ();
+                $table -> unsignedInteger ( 'user_id' );
+                $table -> unsignedInteger ( 'conversation_id' ) -> nullable ();
             }
             $table -> string ( 'category', 255 );
 
@@ -48,15 +48,16 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('group_user');
         Schema ::create ( 'group_user', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsignedBigIntegers ();
-                $table -> integer ( 'group_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'user_id' );
+                $table -> unsignedBigInteger ( 'group_id' );
             }else{
                 $table -> increments ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsigned ();
-                $table -> integer ( 'group_id' ) -> unsigned ();
+                $table -> unsignedInteger ( 'user_id' );
+                $table -> unsignedInteger ( 'group_id' );
             }
             $table -> tinyInteger ( 'is_blocked' ) ->default ( 0 );
             $table -> string ( 'unique_id' ) -> nullable ();
@@ -65,13 +66,14 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('posts');
         Schema ::create ( 'posts', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'user_id' ) ;
             }else{
                 $table -> increments ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsigned ();
+                $table -> unsignedInteger ( 'user_id' );
             }
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> string ( 'title' );
@@ -82,15 +84,16 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('groups_comments');
         Schema ::create ( 'groups_comments', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsignedBigIntegers ();
-                $table -> integer ( 'post_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'user_id' );
+                $table -> unsignedBigInteger ( 'post_id' );
             }else{
                 $table -> increments ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsigned ();
-                $table -> integer ( 'post_id' ) -> unsigned ();
+                $table -> unsignedInteger ( 'user_id' );
+                $table -> unsignedInteger ( 'post_id' );
             }
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> text ( 'user_ip' ) -> nullable ();
@@ -101,33 +104,37 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('comments_attachment');
         Schema ::create ( 'comments_attachment', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'comment_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'comment_id' );
             }else{
                 $table -> increments ( 'id' );
-                $table -> integer ( 'comment_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedInteger ( 'comment_id' );
             }
             $table -> text ( 'attachment_url' );
             $table -> enum ( 'attachment_type', [ 'image', 'video' ] );
             $table -> timestamps ();
             $table -> softDeletes ();
+
         } );
 
+        Schema::dropIfExists('group_post');
         Schema ::create ( 'group_post', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
-                $table -> integer ( 'group_id' ) -> unsignedBigIntegers ();
-                $table -> integer ( 'post_id' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'group_id' );
+                $table -> unsignedBigInteger ( 'post_id' );
             }else{
-                $table -> integer ( 'group_id' ) -> unsigned ();
-                $table -> integer ( 'post_id' ) -> unsigned ();
+                $table -> unsignedInteger ( 'group_id' );
+                $table -> unsignedInteger ( 'post_id' );
             }
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> timestamps ();
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('likes');
         Schema ::create ( 'likes', function ( Blueprint $table ) {
             $table -> integer ( 'user_id' ) -> index ();
             if ( $this -> useBigIncrements ) $table -> integer ( 'likeable_id' ) -> unsignedBigIntegers ();
@@ -139,6 +146,7 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('reports');
         Schema ::create ( 'reports', function ( Blueprint $table ) {
             $table -> integer ( 'user_id' ) -> index ();
             if ( $this -> useBigIncrements ) $table -> integer ( 'reportable_id' ) -> unsignedBigIntegers ();
@@ -150,15 +158,16 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('group_request');
         Schema ::create ( 'group_request', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsignedBigIntegers () -> index ();
-                $table -> integer ( 'group_id' ) -> unsignedBigIntegers () -> index ();
+                $table -> unsignedBigInteger ( 'user_id' ) -> index ();
+                $table -> unsignedBigInteger ( 'group_id' ) -> index ();
             }else{
                 $table -> increments ( 'id' );
-                $table -> integer ( 'user_id' ) -> unsigned () -> index ();
-                $table -> integer ( 'group_id' ) -> unsigned () -> index ();
+                $table -> unsignedInteger ( 'user_id' ) -> index ();
+                $table -> unsignedInteger ( 'group_id' ) -> index ();
             }
             $table -> string ( 'unique_id' ) -> nullable ();
             $table -> tinyInteger ( 'is_invite' ) ->default ( 0 ) -> comment ( '1=true;0=false' );
@@ -166,16 +175,16 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
+        Schema::dropIfExists('group_tags');
         Schema ::create ( 'group_tags', function ( Blueprint $table ) {
             $table -> increments ( 'id' );
             $table -> string ( 'name' );
             if ( $this -> useBigIncrements ){
                 $table -> unsignedBigInteger ( 'group_id' );
-                $table -> integer ( 'created_by' ) -> unsignedBigIntegers ();
+                $table -> unsignedBigInteger ( 'created_by' );
             }else{
-                $table -> integer ( 'group_id' ) -> unsigned ();
-                $table -> integer ( 'created_by' ) -> unsigned ();
-                $table -> integer ( 'group_id' ) -> unsigned ();
+                $table -> unsignedInteger ( 'group_id' );
+                $table -> unsignedInteger ( 'created_by' );
             }
             $table -> timestamps ();
         } );
