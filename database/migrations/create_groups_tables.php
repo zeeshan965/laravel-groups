@@ -104,20 +104,19 @@ class CreateGroupsTables extends Migration
             $table -> softDeletes ();
         } );
 
-        Schema::dropIfExists('comments_attachment');
-        Schema ::create ( 'comments_attachment', function ( Blueprint $table ) {
+        Schema::dropIfExists('group_attachment');
+        Schema ::create ( 'group_attachment', function ( Blueprint $table ) {
             if ( $this -> useBigIncrements ){
                 $table -> bigIncrements ( 'id' );
-                $table -> unsignedBigInteger ( 'comment_id' );
+                $table -> unsignedBigInteger ( 'attachment_id' );
             }else{
                 $table -> increments ( 'id' );
-                $table -> unsignedInteger ( 'comment_id' );
+                $table -> unsignedInteger ( 'attachment_id' );
             }
             $table -> text ( 'attachment_url' );
             $table -> enum ( 'attachment_type', [ 'image', 'video' ] );
             $table -> timestamps ();
             $table -> softDeletes ();
-
         } );
 
         Schema::dropIfExists('group_post');
@@ -202,7 +201,7 @@ class CreateGroupsTables extends Migration
         Schema ::drop ( 'group_user' );
         Schema ::drop ( 'posts' );
         Schema ::drop ( 'groups_comments' );
-        Schema ::drop ( 'comments_attachment' );
+        Schema ::drop ( 'group_attachment' );
         Schema ::drop ( 'group_post' );
         Schema ::drop ( 'likes' );
         Schema ::drop ( 'reports' );
