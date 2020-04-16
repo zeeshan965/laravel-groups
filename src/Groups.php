@@ -2,6 +2,8 @@
 
 namespace Psycho\Groups;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Psycho\Groups\Models\Comment;
 use Psycho\Groups\Models\Group;
 use Psycho\Groups\Models\Post;
@@ -122,5 +124,25 @@ class Groups
     public function comment ( $commentId )
     {
         return $this -> comment -> findOrFail ( $commentId );
+    }
+
+    /**
+     * @param $file
+     * @param $callback
+     * @return string
+     */
+    public static function save_to_s3 ( $file, $callback )
+    {
+        if ( ! function_exists ( $callback ) ) return null;
+
+        //$unique_id will return string unique value
+        $unique_id = $callback ( Auth ::user () );
+
+        $ext = "." . $file -> getClientOriginalExtension ();
+        $name = time () . generateRandomString () . $ext;
+        $filePath = 'groups/' . $unique_id . '/' . $name;
+        Storage ::disk ( 's3' ) -> put ( $filePath, file_get_contents ( $file ) );
+        return $filePath;
+
     }
 }

@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Psycho\Groups\Groups;
 use Psycho\Groups\Traits\Likes;
 use Psycho\Groups\Traits\Reporting;
 
@@ -37,6 +37,7 @@ class Post extends Model
     {
         parent ::boot ();
         self ::creating ( function ( $model ) {
+            dd ($model);
             $model -> unique_id = md5 ( uniqid ( rand (), true ) );
         } );
     }
@@ -90,10 +91,9 @@ class Post extends Model
     public static function add_post ( $data )
     {
         try {
-            $self = self ::create ( self ::prepare_data ( $data, true ) );
+            $self = self ::create ( self ::prepare_data ( $data, false ) );
             $group = Group ::find ( $data[ 'group_id' ] );
-            $attach = $group -> attachPost ( $self -> id );
-            dd ( $self -> toArray (), $attach );
+            $group -> attachPost ( $self -> id );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
@@ -112,7 +112,7 @@ class Post extends Model
     {
         try {
             $self = self ::find ( $id );
-            $self -> update ( $data );
+            $self -> update ( self ::prepare_data ( $data ) );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
@@ -122,31 +122,17 @@ class Post extends Model
 
     /**
      * @param $data
-     * @param bool $create
+     * @param bool $update
      * @return mixed
      */
-    private static function prepare_data ( $data, $create = false )
+    private static function prepare_data ( $data, $update = true )
     {
-        //if ( isset( $data[ 'postMedia' ] ) ) $array[ 'image' ] = self ::save_to_s3 ( $data[ 'postMedia' ] );
+        if ( isset( $data[ 'postMedia' ] ) ) $array[ 'image' ] = Groups ::save_to_s3 ( $data[ 'postMedia' ], 'getCompanyUniqueId' );
         $array[ 'title' ] = $data[ 'postTitle' ];
         $array[ 'body' ] = $data[ 'postBody' ];
         $array[ 'type' ] = $data[ 'postStatus' ] === 'on' ? 1 : 0;
-        $array[ 'user_id' ] = Auth ::user () -> id;
+        if ( $update === false ) $array[ 'user_id' ] = Auth ::user () -> id;
 
         return $array;
-    }
-
-    /**
-     * @param $file
-     * @return string
-     */
-    private static function save_to_s3 ( $file )
-    {
-        $ext = "." . $file -> getClientOriginalExtension ();
-        $name = time () . generateRandomString () . $ext;
-        $filePath = 'groups/posts/' . getCompanyUniqueId ( Auth ::user () ) . '/' . $name;
-        Storage ::disk ( 's3' ) -> put ( $filePath, file_get_contents ( $file ) );
-        return $filePath;
-
     }
 }

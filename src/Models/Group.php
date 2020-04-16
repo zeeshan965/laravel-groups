@@ -2,14 +2,12 @@
 
 namespace Psycho\Groups\Models;
 
-use App\Facades\Helper;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Psycho\Groups\Groups;
 
@@ -45,7 +43,7 @@ class Group extends Model
             $model -> unique_id = md5 ( uniqid ( rand (), true ) );
         } );
     }
-    
+
     /**
      * @var array
      */
@@ -287,11 +285,11 @@ class Group extends Model
      */
     private static function prepare_data ( $request, $user_id, $create = false )
     {
-        if ( $request -> has ( 'group_cover' ) === true ) $array[ 'image' ] = self ::save_to_s3 ( $request -> group_cover );
-        if ( $request -> has ( 'group_icon' ) === true ) $array[ 'icon' ] = self ::save_to_s3 ( $request -> group_icon );
+        if ( $request -> has ( 'group_cover' ) === true ) $array[ 'image' ] = Groups ::save_to_s3 ( $request -> group_cover, 'getCompanyUniqueId' );
+        if ( $request -> has ( 'group_icon' ) === true ) $array[ 'icon' ] = Groups ::save_to_s3 ( $request -> group_icon, 'getCompanyUniqueId' );
         if ( $request -> has ( 'cover_image_remove' ) === true && $request -> cover_image_remove == 1 ) $array[ 'image' ] = "";
         if ( $request -> has ( 'icon_image_remove' ) === true && $request -> icon_image_remove == 1 ) $array[ 'icon' ] = "";
-        
+
         $array[ 'name' ] = $request -> group_name;
         $array[ 'description' ] = $request -> description;
         $array[ 'private' ] = $request -> privacy;
@@ -309,24 +307,11 @@ class Group extends Model
     {
         if ( ! function_exists ( $callback ) ) return null;
 
+        //$role will return integer value
         $role = $callback ( $item[ 'role_id' ], $item[ 'status' ] );
         $user = $request -> toArray ();
         $user[ 'role' ] = $role;
         return $user;
-    }
-
-    /**
-     * @param $image
-     * @return string
-     */
-    private static function save_to_s3 ( $image )
-    {
-        $ext = "." . $image -> getClientOriginalExtension ();
-        $name = time () . generateRandomString () . $ext;
-        $filePath = 'groups/' . getCompanyUniqueId ( Auth ::user () ) . '/' . $name;
-        Storage ::disk ( 's3' ) -> put ( $filePath, file_get_contents ( $image ) );
-        return $filePath;
-
     }
 
     /**
@@ -355,7 +340,7 @@ class Group extends Model
         try {
             $old = isset( $this -> image ) && $this -> image !== null ? explode ( "groups", $this -> image )[ 1 ] : '';
             Storage ::disk ( 's3' ) -> delete ( "groups" . $old );
-            $this -> image = self ::save_to_s3 ( $cover );
+            $this -> image = Groups ::save_to_s3 ( $cover, 'getCompanyUniqueId' );
             $this -> save ();
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $this -> image ];
         } catch ( Exception $e ) {
