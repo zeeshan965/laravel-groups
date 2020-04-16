@@ -35,6 +35,18 @@ class Group extends Model
     ];
 
     /**
+     * Boot method for Group
+     * On create add unique_id
+     */
+    public static function boot ()
+    {
+        parent ::boot ();
+        self ::creating ( function ( $model ) {
+            $model -> unique_id = md5 ( uniqid ( rand (), true ) );
+        } );
+    }
+    
+    /**
      * @var array
      */
     protected $invited_users = [];
@@ -120,7 +132,6 @@ class Group extends Model
         foreach ( $users as $item ) {
             $request = new GroupRequest( [
                 'user_id' => $item[ 'id' ],
-                'unique_id' => md5 ( uniqid ( rand (), true ) ),
                 'is_invite' => $is_invite === true ? 1 : 0
             ] );
             $this -> requests () -> save ( $request );
@@ -180,9 +191,7 @@ class Group extends Model
             $group_user = new GroupUser();
             $group_user -> user_id = $members;
             $group_user -> group_id = $this -> id;
-            $group_user -> unique_id = md5 ( uniqid ( rand (), true ) );
             $group_user -> save ();
-            //$this -> users () -> attach ( $members );
         }
 
         return $this;
@@ -282,7 +291,7 @@ class Group extends Model
         if ( $request -> has ( 'group_icon' ) === true ) $array[ 'icon' ] = self ::save_to_s3 ( $request -> group_icon );
         if ( $request -> has ( 'cover_image_remove' ) === true && $request -> cover_image_remove == 1 ) $array[ 'image' ] = "";
         if ( $request -> has ( 'icon_image_remove' ) === true && $request -> icon_image_remove == 1 ) $array[ 'icon' ] = "";
-        if ( $create === true ) $array[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
+        
         $array[ 'name' ] = $request -> group_name;
         $array[ 'description' ] = $request -> description;
         $array[ 'private' ] = $request -> privacy;

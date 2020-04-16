@@ -34,6 +34,18 @@ class Comment extends Model
     protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type', 'parent_id', 'user_ip' ];
 
     /**
+     * Boot method for Comment
+     * On create add unique_id
+     */
+    public static function boot ()
+    {
+        parent ::boot ();
+        self ::creating ( function ( $model ) {
+            $model -> unique_id = md5 ( uniqid ( rand (), true ) );
+        } );
+    }
+
+    /**
      * @var array
      */
     protected static $ids = [];
@@ -117,7 +129,6 @@ class Comment extends Model
     {
         try {
             $data[ 'parent_id' ] = $data[ 'parent_id' ] === 'null' || $data[ 'parent_id' ] === null ? null : $data[ 'parent_id' ];
-            $data[ 'unique_id' ] = md5 ( uniqid ( rand (), true ) );
             $data[ 'user_ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
             $data[ 'user_id' ] = Auth ::user () -> id;
             $self = self ::create ( $data );

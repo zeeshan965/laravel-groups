@@ -23,6 +23,18 @@ class GroupRequest extends Model
     protected $fillable = [ 'user_id', 'group_id', 'unique_id', 'is_invite' ];
 
     /**
+     * Boot method for GroupRequest
+     * On create add unique_id
+     */
+    public static function boot ()
+    {
+        parent ::boot ();
+        self ::creating ( function ( $model ) {
+            $model -> unique_id = md5 ( uniqid ( rand (), true ) );
+        } );
+    }
+    
+    /**
      * Get the route key for the model.
      *
      * @return string

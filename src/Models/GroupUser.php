@@ -15,6 +15,18 @@ class GroupUser extends Model
     protected $table = 'group_user';
 
     /**
+     * Boot method for GroupUser
+     * On create add unique_id
+     */
+    public static function boot ()
+    {
+        parent ::boot ();
+        self ::creating ( function ( $model ) {
+            $model -> unique_id = md5 ( uniqid ( rand (), true ) );
+        } );
+    }
+    
+    /**
      * @return mixed
      */
     public function group ()
