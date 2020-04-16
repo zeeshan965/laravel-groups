@@ -90,7 +90,7 @@ class Group extends Model
      */
     public function posts ()
     {
-        return $this -> belongsToMany ( Post::class, 'group_post' ) -> withTimestamps ();
+        return $this -> belongsToMany ( Post::class, 'group_post' ) -> withTimestamps () -> orderBy ( 'id', 'desc' );
     }
 
     /**
@@ -251,7 +251,7 @@ class Group extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $group ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
 
     }
@@ -273,7 +273,7 @@ class Group extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $group ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
@@ -327,7 +327,7 @@ class Group extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $this -> invited_users ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
@@ -345,7 +345,7 @@ class Group extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $this -> image ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 }

@@ -104,10 +104,11 @@ class Post extends Model
             if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
             $group = Group ::find ( $data[ 'group_id' ] );
             $group -> attachPost ( $self -> id );
+            //$self = self ::where ( 'id', $self -> id ) -> with ( 'owner,media' ) -> first ();
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
@@ -126,7 +127,7 @@ class Post extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
@@ -139,7 +140,7 @@ class Post extends Model
     {
         $array[ 'title' ] = $data[ 'postTitle' ];
         $array[ 'body' ] = $data[ 'postBody' ];
-        $array[ 'type' ] = $data[ 'postStatus' ] === 'on' ? 1 : 0;
+        $array[ 'type' ] = isset( $data[ 'postStatus' ] ) && $data[ 'postStatus' ] === 'on' ? 1 : 0;
         if ( $update === false ) $array[ 'user_id' ] = Auth ::user () -> id;
 
         return $array;

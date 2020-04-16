@@ -64,7 +64,7 @@ class Comment extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record deleted successfully!', 'data' => $status ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
 
     }
@@ -147,7 +147,7 @@ class Comment extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
@@ -166,7 +166,7 @@ class Comment extends Model
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
-            return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
 
