@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Psycho\Groups\Groups;
 use Psycho\Groups\Traits\Likes;
 use Psycho\Groups\Traits\Reporting;
 
@@ -120,6 +121,16 @@ class Comment extends Model
     }
 
     /**
+     * Get the comment's media.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function media ()
+    {
+        return $this -> morphOne ( GroupAttachment::class, 'attachment' );
+    }
+
+    /**
      * Adds a comment.
      *
      * @param $data
@@ -132,6 +143,7 @@ class Comment extends Model
             $data[ 'user_ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
             $data[ 'user_id' ] = Auth ::user () -> id;
             $self = self ::create ( $data );
+            if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
@@ -157,4 +169,16 @@ class Comment extends Model
             return [ 'status' => 'success', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }
+
+    /**
+     * @param $file
+     * @param $comment
+     */
+    private static function attach_media ( $file, $comment )
+    {
+        $url = Groups ::save_to_s3 ( $file, 'getCompanyUniqueId' );
+        $attachment = new GroupAttachment( [ 'attachment_url' => $url ] );
+        $comment -> media () -> save ( $attachment );
+    }
+    
 }

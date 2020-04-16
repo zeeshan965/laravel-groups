@@ -37,7 +37,6 @@ class Post extends Model
     {
         parent ::boot ();
         self ::creating ( function ( $model ) {
-            dd ($model);
             $model -> unique_id = md5 ( uniqid ( rand (), true ) );
         } );
     }
@@ -83,6 +82,16 @@ class Post extends Model
     }
 
     /**
+     * Get the post's media.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function media ()
+    {
+        return $this -> morphOne ( GroupAttachment::class, 'attachment' );
+    }
+
+    /**
      * Adds a comment.
      *
      * @param $data
@@ -92,6 +101,7 @@ class Post extends Model
     {
         try {
             $self = self ::create ( self ::prepare_data ( $data, false ) );
+            if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
             $group = Group ::find ( $data[ 'group_id' ] );
             $group -> attachPost ( $self -> id );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
@@ -127,7 +137,6 @@ class Post extends Model
      */
     private static function prepare_data ( $data, $update = true )
     {
-        if ( isset( $data[ 'postMedia' ] ) ) $array[ 'image' ] = Groups ::save_to_s3 ( $data[ 'postMedia' ], 'getCompanyUniqueId' );
         $array[ 'title' ] = $data[ 'postTitle' ];
         $array[ 'body' ] = $data[ 'postBody' ];
         $array[ 'type' ] = $data[ 'postStatus' ] === 'on' ? 1 : 0;
@@ -135,4 +144,16 @@ class Post extends Model
 
         return $array;
     }
+
+    /**
+     * @param $file
+     * @param $post
+     */
+    private static function attach_media ( $file, $post )
+    {
+        $url = Groups ::save_to_s3 ( $file, 'getCompanyUniqueId' );
+        $attachment = new GroupAttachment( [ 'attachment_url' => $url ] );
+        $post -> media () -> save ( $attachment );
+    }
+
 }

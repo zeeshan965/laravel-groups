@@ -114,7 +114,7 @@ class CreateGroupsTables extends Migration
                 $table -> unsignedInteger ( 'attachment_id' );
             }
             $table -> text ( 'attachment_url' );
-            $table -> enum ( 'attachment_type', [ 'image', 'video' ] );
+            $table -> string ( 'attachment_type' ) -> nullable ();
             $table -> timestamps ();
             $table -> softDeletes ();
         } );
