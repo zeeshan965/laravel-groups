@@ -50,18 +50,18 @@ class Post extends Model
     }
 
     /**
-     * @param $id
+     * @return |null
      */
-    public function getAttachmentUrlAttribute ( $id )
+    public function getAttachmentUrlAttribute ()
     {
         if ( $this -> media == null ) return null;
         return $this -> media -> attachment_url;
     }
 
     /**
-     * @param $id
+     * @return mixed|null
      */
-    public function getAttachmentTypeAttribute ( $id )
+    public function getAttachmentTypeAttribute ()
     {
         if ( $this -> media == null ) return null;
         $ext = pathinfo ( $this -> media -> attachment_url, PATHINFO_EXTENSION );
@@ -181,8 +181,11 @@ class Post extends Model
     private static function attach_media ( $file, $post )
     {
         $url = Groups ::save_to_s3 ( $file, 'getCompanyUniqueId' );
-        $attachment = new GroupAttachment( [ 'attachment_url' => $url ] );
-        $post -> media () -> save ( $attachment );
+        $data = $post -> media () -> first ();
+        $attachment = $post -> media () -> updateOrCreate ( [
+            'attachment_id' => isset( $data -> attachment_id ) ? $data -> attachment_id : null,
+            'attachment_type' => isset( $data -> attachment_type ) ? $data -> attachment_type : null
+        ], [ 'attachment_url' => $url ] );
         $post -> setRelation ( 'media', $attachment );
     }
 
