@@ -35,6 +35,11 @@ class Comment extends Model
     protected $fillable = [ 'post_id', 'user_id', 'body', 'unique_id', 'type', 'parent_id', 'user_ip' ];
 
     /**
+     * @var array
+     */
+    protected $appends = [ 'attachment_url', 'attachment_type' ];
+
+    /**
      * Boot method for Comment
      * On create add unique_id
      */
@@ -44,6 +49,28 @@ class Comment extends Model
         self ::creating ( function ( $model ) {
             $model -> unique_id = md5 ( uniqid ( rand (), true ) );
         } );
+        self ::retrieved ( function ( $model ) {
+            $model -> setRelation ( 'media', GroupAttachment ::find ( $model -> media -> id ?? null ) );
+        } );
+    }
+
+    /**
+     * @return |null
+     */
+    public function getAttachmentUrlAttribute ()
+    {
+        if ( $this -> media == null ) return null;
+        return $this -> media -> attachment_url;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getAttachmentTypeAttribute ()
+    {
+        if ( $this -> media == null ) return null;
+        $ext = pathinfo ( $this -> media -> attachment_url, PATHINFO_EXTENSION );
+        return $ext;
     }
 
     /**
@@ -143,7 +170,7 @@ class Comment extends Model
             $data[ 'user_ip' ] = $_SERVER[ 'REMOTE_ADDR' ];
             $data[ 'user_id' ] = Auth ::user () -> id;
             $self = self ::create ( $data );
-            if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
+            if ( isset( $data[ 'comment_image' ] ) ) self ::attach_media ( $data[ 'comment_image' ], $self );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
@@ -163,6 +190,7 @@ class Comment extends Model
         try {
             $self = self ::find ( $id );
             $self -> update ( $data );
+            if ( isset( $data[ 'comment_image' ] ) ) self ::attach_media ( $data[ 'comment_image' ], $self );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
@@ -177,8 +205,22 @@ class Comment extends Model
     private static function attach_media ( $file, $comment )
     {
         $url = Groups ::save_to_s3 ( $file, 'getCompanyUniqueId' );
-        $attachment = new GroupAttachment( [ 'attachment_url' => $url ] );
-        $comment -> media () -> save ( $attachment );
+        $data = $comment -> media () -> first ();
+        $attachment = $comment -> media () -> updateOrCreate ( [
+            'attachment_id' => isset( $data -> attachment_id ) ? $data -> attachment_id : null,
+            'attachment_type' => isset( $data -> attachment_type ) ? $data -> attachment_type : null
+        ], [ 'attachment_url' => $url ] );
+        $comment -> setRelation ( 'media', $attachment );
     }
-    
+
+    /**
+     * @return $this
+     */
+    private function detach_media ()
+    {
+        $this -> media () -> delete ();
+        $this -> setRelation ( 'media', null );
+        return $this;
+    }
+
 }
