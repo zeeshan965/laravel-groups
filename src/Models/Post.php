@@ -30,15 +30,42 @@ class Post extends Model
     protected $fillable = [ 'title', 'user_id', 'body', 'type', 'extra_info', 'unique_id' ];
 
     /**
+     * @var array
+     */
+    protected $appends = [ 'attachment_url', 'attachment_type' ];
+
+    /**
      * Boot method for Post
      * On create add unique_id
      */
     public static function boot ()
     {
         parent ::boot ();
-        self ::creating ( function ( $model ) {
-            $model -> unique_id = md5 ( uniqid ( rand (), true ) );
+        self ::creating ( function ( $post ) {
+            $post -> unique_id = md5 ( uniqid ( rand (), true ) );
         } );
+        self ::retrieved ( function ( $post ) {
+            $post -> setRelation ( 'media', GroupAttachment ::find ( $post -> media -> id ?? null ) );
+        } );
+    }
+
+    /**
+     * @param $id
+     */
+    public function getAttachmentUrlAttribute ( $id )
+    {
+        if ( $this -> media == null ) return null;
+        return $this -> media -> attachment_url;
+    }
+
+    /**
+     * @param $id
+     */
+    public function getAttachmentTypeAttribute ( $id )
+    {
+        if ( $this -> media == null ) return null;
+        $ext = pathinfo ( $this -> media -> attachment_url, PATHINFO_EXTENSION );
+        return $ext;
     }
 
     /**
@@ -104,7 +131,6 @@ class Post extends Model
             if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
             $group = Group ::find ( $data[ 'group_id' ] );
             $group -> attachPost ( $self -> id );
-            //$self = self ::where ( 'id', $self -> id ) -> with ( 'owner,media' ) -> first ();
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
             $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
