@@ -150,7 +150,7 @@ class Post extends Model
         try {
             $self = self ::find ( $id );
             $self -> update ( self ::prepare_data ( $data, true ) );
-            if ( isset( $data[ 'postMediaRemove' ] ) && $data[ 'postMediaRemove' ] == 1 ) $self -> detach_media ( $self -> id );
+            if ( isset( $data[ 'postMediaRemove' ] ) && $data[ 'postMediaRemove' ] == 1 ) $self -> detach_media ();
             if ( isset( $data[ 'postMedia' ] ) ) self ::attach_media ( $data[ 'postMedia' ], $self );
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record update successfully!', 'data' => $self ];
         } catch ( Exception $e ) {
@@ -183,15 +183,16 @@ class Post extends Model
         $url = Groups ::save_to_s3 ( $file, 'getCompanyUniqueId' );
         $attachment = new GroupAttachment( [ 'attachment_url' => $url ] );
         $post -> media () -> save ( $attachment );
+        $post -> setRelation ( 'media', $attachment );
     }
 
     /**
-     * @param $postId
      * @return $this
      */
-    private function detach_media ( $id )
+    private function detach_media ()
     {
-        $this -> media () -> delete();
+        $this -> media () -> delete ();
+        $this -> setRelation ( 'media', null );
         return $this;
     }
 
