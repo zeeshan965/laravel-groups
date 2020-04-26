@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Psycho\Groups\Groups;
 
@@ -31,6 +32,11 @@ class Group extends Model
     protected $fillable = [
         'unique_id', 'name', 'user_id', 'description', 'short_description', 'image', 'icon', 'private', 'extra_info', 'settings', 'conversation_id'
     ];
+
+    /**
+     * @var array
+     */
+    protected $appends = [ 'have_access', 'has_admin_access' ];
 
     /**
      * Boot method for Group
@@ -83,6 +89,31 @@ class Group extends Model
     public function users ()
     {
         return $this -> belongsToMany ( Groups ::userModel (), 'group_user' ) -> withTimestamps ();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function onlyAdminUser ()
+    {
+        return $this -> hasOne ( GroupUser::class, 'group_id', 'id' ) -> where ( 'user_id', Auth ::id () );
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getHaveAccessAttribute ()
+    {
+        return $this -> user_id === Auth ::id () ? true : false;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getHasAdminAccessAttribute ()
+    {
+        if ( $this -> onlyAdminUser === null ) return false;
+        return $this -> onlyAdminUser -> is_admin == 1 ? true : false;
     }
 
     /**
