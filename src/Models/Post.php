@@ -194,9 +194,26 @@ class Post extends Model
      */
     private function detach_media ()
     {
-        $this -> media () -> delete ();
         $this -> setRelation ( 'media', null );
-        return $this;
+        return $this -> media () -> delete ();
     }
 
+    /**
+     * @param $id
+     * @return array
+     */
+    public static function recursiveDelete ( $id )
+    {
+        try {
+            $self = self ::find ( $id );
+            $media = $self -> detach_media ();
+            $comments = $self -> allComments () -> delete ();
+            $status = $self -> delete ();
+            return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record deleted successfully!', 'data' => $status ];
+        } catch ( Exception $e ) {
+            $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
+            return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
+        }
+
+    }
 }
