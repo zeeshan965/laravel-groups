@@ -85,8 +85,10 @@ class Comment extends Model
     {
         try {
             $self = self ::find ( $id );
+            $self -> detach_media ();
             array_push ( self ::$ids, $self -> id );
             if ( $self -> replies -> count () > 0 ) self ::removeChildren ( $self -> replies );
+
             $status = self ::destroy ( self ::$ids ) === count ( self ::$ids ) ? true : false;
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record deleted successfully!', 'data' => $status ];
         } catch ( Exception $e ) {
@@ -103,6 +105,7 @@ class Comment extends Model
     {
         foreach ( $replies as $reply ) {
             array_push ( self ::$ids, $reply -> id );
+            $reply -> detach_media ();
             if ( $reply -> replies -> count () > 0 ) self ::removeChildren ( $reply -> replies );
         }
     }
@@ -218,9 +221,8 @@ class Comment extends Model
      */
     private function detach_media ()
     {
-        $this -> media () -> delete ();
         $this -> setRelation ( 'media', null );
-        return $this;
+        return $this -> media () -> delete ();
     }
 
 }
