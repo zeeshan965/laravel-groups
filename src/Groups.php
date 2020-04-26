@@ -370,7 +370,7 @@ class Group extends Model
     }
 
     /**
-     * @param $replies
+     * @param $posts
      */
     private static function removePosts ( $posts )
     {
