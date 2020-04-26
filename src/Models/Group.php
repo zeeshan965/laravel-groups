@@ -339,12 +339,13 @@ class Group extends Model
     {
         try {
             $old = isset( $this -> image ) && $this -> image !== null ? explode ( "groups", $this -> image )[ 1 ] : '';
-            Storage ::disk ( 's3' ) -> delete ( "groups" . $old );
+            Storage ::disk ( 's3' ) -> delete ( "groups".$old );
             $this -> image = Groups ::save_to_s3 ( $request -> cover, 'getCompanyUniqueId' );
+            if ( $request -> has ( 'position' ) && $request -> position !== null ) $this -> cover_position = $request -> position;
             $this -> save ();
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record saved successfully!', 'data' => $this -> image ];
         } catch ( Exception $e ) {
-            $message = $e -> getLine () . "Something went wrong, Please contact support!" . $e -> getMessage ();
+            $message = $e -> getLine ()."Something went wrong, Please contact support!".$e -> getMessage ();
             return [ 'status' => 'error', 'status_code' => 500, 'messages' => $message, 'data' => null ];
         }
     }

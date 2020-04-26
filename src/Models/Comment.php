@@ -86,7 +86,7 @@ class Comment extends Model
         try {
             $self = self ::find ( $id );
             array_push ( self ::$ids, $self -> id );
-            if ( $self -> replies -> count () > 0 ) $ids = self ::removeChildren ( $self -> replies, self ::$ids );
+            if ( $self -> replies -> count () > 0 ) self ::removeChildren ( $self -> replies );
             $status = self ::destroy ( self ::$ids ) === count ( self ::$ids ) ? true : false;
             return [ 'status' => 'success', 'status_code' => 200, 'messages' => 'Record deleted successfully!', 'data' => $status ];
         } catch ( Exception $e ) {
