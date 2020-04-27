@@ -36,7 +36,7 @@ class Group extends Model
     /**
      * @var array
      */
-    protected $appends = [ 'have_access', 'has_admin_access' ];
+    protected $appends = [ 'have_access', 'has_admin_access', 'has_requested' ];
 
     /**
      * Boot method for Group
@@ -100,6 +100,14 @@ class Group extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function onlyGroupRequest ()
+    {
+        return $this -> hasOne ( GroupRequest::class, 'group_id', 'id' ) -> where ( 'user_id', Auth ::id () );
+    }
+
+    /**
      * @return mixed|null
      */
     public function getHaveAccessAttribute ()
@@ -114,6 +122,15 @@ class Group extends Model
     {
         if ( $this -> onlyAdminUser === null ) return false;
         return $this -> onlyAdminUser -> is_admin == 1 ? true : false;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getHasRequestedAttribute ()
+    {
+        if ( $this -> onlyGroupRequest === null ) return false;
+        return true;
     }
 
     /**
