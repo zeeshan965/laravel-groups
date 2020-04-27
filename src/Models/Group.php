@@ -130,7 +130,7 @@ class Group extends Model
     public function getHasRequestedAttribute ()
     {
         if ( $this -> onlyGroupRequest === null ) return false;
-        return true;
+        return $this -> onlyGroupRequest -> is_invite == 1 ? true : false;
     }
 
     /**
