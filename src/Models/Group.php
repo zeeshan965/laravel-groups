@@ -2,6 +2,7 @@
 
 namespace Psycho\Groups\Models;
 
+use App\Models\GroupCategory;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -241,6 +242,14 @@ class Group extends Model
         }
 
         return $this;
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function categoryData ()
+    {
+        return $this -> belongsTo ( GroupCategory::class, 'category','id' );
     }
 
     /**
