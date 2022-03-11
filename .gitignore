@@ -6,7 +6,6 @@ node_modules/
 CVS/
 .idea
 deploy.php
-composer.lock
 # Compiled source #
 ###################
 *.com
